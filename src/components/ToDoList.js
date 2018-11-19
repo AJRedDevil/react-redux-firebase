@@ -1,10 +1,10 @@
-import './TodoList.css';
+import './ToDoList.css';
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import _ from 'lodash';
-
 import * as actions from '../actions';
 import ToDoListItem from './ToDoListItem';
+import Preloader from './Preloader';
 
 class ToDoList extends Component {
   state = {
@@ -13,15 +13,24 @@ class ToDoList extends Component {
   };
 
   handleInputChange = event => {
-    this.setState({addFormValue: event.target.value});
+    this.setState({
+      addFormValue: event.target.value,
+    });
   };
 
   handleFormSubmit = event => {
     const {addFormValue} = this.state;
-    const {addToDo} = this.props;
+    const {addToDo, auth} = this.props;
     event.preventDefault();
-    addToDo({title: addFormValue});
-    this.setState({addFormValue: ''});
+    addToDo(
+      {
+        title: addFormValue,
+      },
+      auth.uid
+    );
+    this.setState({
+      addFormValue: '',
+    });
   };
 
   renderAddForm = () => {
@@ -29,19 +38,16 @@ class ToDoList extends Component {
     if (addFormVisible) {
       return (
         <div id="todo-add-form" className="col s10 offset-s1">
-          {' '}
           <form onSubmit={this.handleFormSubmit}>
-            {' '}
             <div className="input-field">
-              {' '}
-              <i className="material-icons prefix">note_add</i>{' '}
+              <i className="material-icons prefix"> note_add </i>{' '}
               <input
                 value={addFormValue}
                 onChange={this.handleInputChange}
                 id="toDoNext"
                 type="text"
-              />{' '}
-              <label htmlFor="toDoNext">What To Do Next</label>{' '}
+              />
+              <label htmlFor="toDoNext"> What To Do Next </label>{' '}
             </div>{' '}
           </form>{' '}
         </div>
@@ -59,33 +65,47 @@ class ToDoList extends Component {
     }
     return (
       <div className="col s10 offset-s1 center-align">
-        {' '}
         <img
           alt="Nothing was found"
           id="nothing-was-found"
           src="/img/nothing.png"
-        />{' '}
-        <h4>You have completed all the tasks</h4>{' '}
-        <p>Start by clicking add button in the bottom of the screen</p>{' '}
+        />
+        <h4> You have completed all the tasks </h4>{' '}
+        <p> Start by clicking add button in the bottom of the screen </p>{' '}
       </div>
     );
   }
 
   UNSAFE_componentWillMount() {
-    this.props.fetchToDos();
+    const {auth} = this.props;
+    this.props.fetchToDos(auth.uid);
   }
 
   render() {
     const {addFormVisible} = this.state;
+    if (this.props.data === 'loading') {
+      return (
+        <div className="row center-align">
+          <div className="col s4 offset-s4">
+            <Preloader />
+          </div>{' '}
+        </div>
+      );
+    }
     return (
       <div className="to-do-list-container">
         <div className="row">
           {' '}
-          {this.renderAddForm()}
-          {this.renderToDos()}{' '}
+          {this.renderAddForm()} {this.renderToDos()}{' '}
         </div>{' '}
         <div className="fixed-action-btn">
-          {' '}
+          <button
+            onClick={this.props.signOut}
+            id="sign-out-button"
+            className="btn-floating btn-large teal darken-4"
+          >
+            <i className="large material-icons"> exit_to_app </i>{' '}
+          </button>{' '}
           <button
             onClick={() =>
               this.setState({
@@ -94,11 +114,10 @@ class ToDoList extends Component {
             }
             className="btn-floating btn-large teal darken-4"
           >
-            {' '}
             {addFormVisible ? (
-              <i className="large material-icons">close</i>
+              <i className="large material-icons"> close </i>
             ) : (
-              <i className="large material-icons">add</i>
+              <i className="large material-icons"> add </i>
             )}{' '}
           </button>{' '}
         </div>{' '}
@@ -107,8 +126,11 @@ class ToDoList extends Component {
   }
 }
 
-const mapStateToProps = ({data}) => {
-  return {data};
+const mapStateToProps = ({data, auth}) => {
+  return {
+    data,
+    auth,
+  };
 };
 
 export default connect(
