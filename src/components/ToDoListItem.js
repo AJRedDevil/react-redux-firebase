@@ -1,9 +1,14 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 
-import {completeTodo} from '../actions';
+import {completeToDo} from '../actions';
 
 class ToDoListItem extends Component {
+  handleCompleteClick = completeToDoId => {
+    const {completeToDo} = this.props;
+    completeToDo(completeToDoId);
+  };
+
   render() {
     const {todoId, todo} = this.props;
     return (
@@ -26,6 +31,6 @@ class ToDoListItem extends Component {
 export default connect(
   null,
   {
-    completeTodo,
+    completeToDo,
   }
 )(ToDoListItem);
